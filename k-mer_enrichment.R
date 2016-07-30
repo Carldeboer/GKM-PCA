@@ -33,7 +33,6 @@ getKMerTFEnrichment = function(rotated, binaryKMerMatchesToTFs,n_max=3000){
 
 
 minHG = function(x, n_max = length(x)-1){
-  last=-1
   minP = 0;
   mink = 0;
   logOR = 0;
