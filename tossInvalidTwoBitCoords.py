@@ -1,4 +1,4 @@
-#!/home/unix/cgdeboer/bin/python3
+#!/usr/bin/env python3
 import warnings
 import MYUTILS
 import re
