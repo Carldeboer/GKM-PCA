@@ -6,6 +6,12 @@ mkdir -p temp_files/scans/
 mkdir -p temp_files/coords/
 mkdir -p temp_files/fastas/
 
+echo trimming reads
+# trimmomatic can be downloaded from http://www.usadellab.org/cms/?page=trimmomatic
+# NexteraPE-PE.fa is a file that comes with trimmomatic
+java -Xmx1G -jar trimmomatic-0.33.jar PE fastqs/$sample.1.fastq.gz fastqs/$sample.2.fastq.gz fastqs/$sample.1.trimmed.paired.fastq.gz fastqs/$sample.1.trimmed.unpaired.fastq.gz fastqs/$sample.2.trimmed.paired.fastq.gz fastqs/$id.2.trimmed.unpaired.fastq.gz ILLUMINACLIP:~/Programs/Trimmomatic/Trimmomatic-0.33/adapters/NexteraPE-PE.fa:2:30:10:4:true MINLEN:36
+
+
 echo aligning
 #bowtie2 is available here: http://bowtie-bio.sourceforge.net/bowtie2/index.shtml
 #Bowtie2Index is a genome index created with bowtie2-index
