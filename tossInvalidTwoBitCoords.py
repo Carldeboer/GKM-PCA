@@ -38,7 +38,7 @@ invalidChr= 0;
 outOfBounds=0;
 for line in inFile:
   if line is None or line == "" or line[0]=="#": continue
-  m = re.search("([^:]*):([-0-9]*)-([-0-9])",line);
+  m = re.search("^([^:]*):([-0-9]*)-([-0-9]*)$",line);
   if m:
     chr= m.group(1);
     st= int(m.group(2));
