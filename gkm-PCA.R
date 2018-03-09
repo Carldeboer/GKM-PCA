@@ -1,6 +1,6 @@
 inputKMerFreqs = function(fileNames, IDs=fileNames){
 	stopifnot(length(fileNames)==length(IDs))
-	curData = read.table(fileNames[i],sep="\t",header=T,stringsAsFactors=FALSE,quote="",row.names=NULL);
+	curData = read.table(fileNames[1],sep="\t",header=T,stringsAsFactors=FALSE,quote="",row.names=NULL);
 
 	allData=matrix(nrow = nrow(curData),ncol = nrow(sampleDesc));
 	row.names(allData)=curData$kMer;
