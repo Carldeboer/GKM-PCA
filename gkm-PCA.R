@@ -10,7 +10,7 @@ inputKMerFreqs = function(fileNames, IDs=fileNames){
 	  if (i %% 50==1){
 	    message(sprintf("Inputting i=%i/%i",i,length(fileNames)))
 	  }
-	  curData = read.table(sprintf(fileNames[i],sep="\t",header=T,stringsAsFactors=FALSE,quote="",row.names=NULL);
+	  curData = read.table(fileNames[i],sep="\t",header=T,stringsAsFactors=FALSE,quote="",row.names=NULL);
 	  allData[,i] = curData$Pct_FG;
 	}
 	return(allData)
