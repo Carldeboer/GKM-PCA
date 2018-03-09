@@ -5,7 +5,6 @@ inputKMerFreqs = function(fileNames, IDs=fileNames){
 	allData=matrix(nrow = nrow(curData),ncol = nrow(sampleDesc));
 	row.names(allData)=curData$kMer;
 	colnames(allData) = IDs;
-	i=1;
 	for (i in 1:length(fileNames)){
 	  if (i %% 50==1){
 	    message(sprintf("Inputting i=%i/%i",i,length(fileNames)))
