@@ -16,7 +16,8 @@
 #' @examples
 #' kmerMat = inputKMerFreqs(sprintf("kMerFiles/%s.freq.gz",sampleDesc$id), IDs = sampleDesc$id)
 #' myPCA = doKMerPCA(kmerMat, nPCs = "jackstraw")
-#` treatmentPCs = findDistinguishingPCs(myPCA$x[,1:myPCA$nPCs], sampleDesc[c("id","treated")])
+#' treatmentPCs = findDistinguishingPCs(myPCA$x[,1:myPCA$nPCs], sampleDesc[c("id","treated")])
+#' tfEnrichmentsPBM = getKMerTFEnrichment(myPCA$rotation[,1:myPCA$nPCs], cisbp$binaryPBMZScores);
 
 getKMerTFEnrichment = function(rotated, binaryKMerMatchesToTFs,n_max=3000, verbose=F){
   z=1;
