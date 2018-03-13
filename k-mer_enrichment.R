@@ -18,15 +18,17 @@
 #' myPCA = doKMerPCA(kmerMat, nPCs = "jackstraw")
 #` treatmentPCs = findDistinguishingPCs(myPCA$x[,1:myPCA$nPCs], sampleDesc[c("id","treated")])
 
-getKMerTFEnrichment = function(rotated, binaryKMerMatchesToTFs,n_max=3000){
+getKMerTFEnrichment = function(rotated, binaryKMerMatchesToTFs,n_max=3000, verbose=F){
   z=1;
   rotated = rotated[row.names(binaryKMerMatchesToTFs),]; #filter out and sort rows so that they're in the same order
   tfKMerEnrichments = data.frame(TF = NA, PC=NA, pLow = NA, kLow = NA, logORLow = NA, pHigh = NA, kHigh = NA, logORHigh = NA, i = 1:(ncol(rotated)*ncol(binaryKMerMatchesToTFs)), stringsAsFactors = F );
   for(pci in 1:ncol(rotated)){
-    curOrder = order(rotated[pci]); #increasing order
-    message(sprintf("PC = %i",pci));
+    curOrder = order(rotated[,pci]); #increasing order
+    if (verbose){
+      message(sprintf("PC = %i",pci));
+    }
     for (tfi in 1:ncol(binaryKMerMatchesToTFs)){
-      if (tfi %% 20==0){
+      if (tfi %% 20==0 && verbose){
         message(sprintf("\tTF = %i",tfi));
       }
       tfKMerEnrichments$TF[z] = colnames(binaryKMerMatchesToTFs)[tfi];
