@@ -1,3 +1,17 @@
+#' Inputs k-mer frequencies
+#'
+#' Inputs k-mer frequency data from a given set of file names. Each file is tab delimited and has the header: "kMer\tPct_FG"
+#' Followed by, for example "TTGATTG\t0.012" ("<kMer>\t<frequency>").
+#' Assumes that all inputs have the same k-mer order.
+#' 
+#' @param fileNames List of file names to input.
+#' @param IDs List of sample IDs, same order as the file names. Defaults to fileNames.
+#' @return numeric matrix of kmer frequencies, kmers (rows) by samples (columns).
+#' @keywords 
+#' @export
+#' @examples
+#' kmerMat = inputKMerFreqs(sprintf("kMerFiles/%s.freq.gz",sampleDesc$id), IDs = sampleDesc$id)
+
 inputKMerFreqs = function(fileNames, IDs=fileNames){
 	stopifnot(length(fileNames)==length(IDs))
 	curData = read.table(fileNames[1],sep="\t",header=T,stringsAsFactors=FALSE,quote="",row.names=NULL);
@@ -15,7 +29,25 @@ inputKMerFreqs = function(fileNames, IDs=fileNames){
 	return(allData)
 }
 
-doKMerPCA = function(x, nPCs="permutation", scale=T, verbose=F){
+
+#' k-mer PCA+tSNE
+#'
+#' Performs PCA+tSNE of a k-mer frequency matrix. First, the k-mer matrix is scaled, then PCA (prcomp) is performed, then the number of 
+#' significant PCs is determined, then tSNE is performed using the significant PCs.
+#' 
+#' 
+#' @param x A matrix of k-mer frequencies, kmers (rows) by samples (columns), as would be produced by inputKMerFreqs.
+#' @param nPCs Method for identifying significant PCs, or the number of PCs to use. Either one of ("jackstraw", or "permutation"), or an integer number of PCs. defaults to "jackstraw"
+#' @param scale scale the data? defaults to True.
+#' @return a PCA object (as created by prcomp), also including $nPCs (the number of significant PCs), $nPCMethod (the method used to get the number of PCs), 
+#' $tSNE, the tsne object (as created by tsne), and $tSNEProj, the projection of the samples onto the two tSNE components. 
+#' @keywords 
+#' @export
+#' @examples
+#' kmerMat = inputKMerFreqs(sprintf("kMerFiles/%s.freq.gz",sampleDesc$id), IDs = sampleDesc$id)
+#' myPCA = doKMerPCA(kmerMat, nPCs = "jackstraw")
+
+doKMerPCA = function(x, nPCs="jackstraw", scale=T){
 	if(scale){
 		message("Scaling data")
 		scaledData = t(scale(t(x),scale=T, center=T));
@@ -53,6 +85,21 @@ doKMerPCA = function(x, nPCs="permutation", scale=T, verbose=F){
 	return(pcs)
 }
 
+#' Find distinguishing PCs
+#'
+#' Identifies which PCs distinguish a feature of interest. If the feature of interest contains two classes, performs a single rank sum test for each PC.
+#' If the feature of interest has >2 classes, performs a rank sum test to see if the PC separates the class from all others. 
+#' In either case, returns a data frame containing the PC, class, AUROC, and rank sum P-value for how well the PC identifies the class.
+#' 
+#' @param rotatedData The samples' projections on PC space. Include here as many PCs as you want to inspect
+#' @param classLabels Either a data frame (first column containing sample labels, second containing classes), or a list where the names of the list are the sample labels and the entries in the list are the classes.
+#' @return a data.frame containing the following columns: PC (which PC was used for each comparison), AUROC (the area under the ROC curve for how well each PC distinguishes each class), P (rank sum p-value for how well the PC distinguishes the class), class (the class).
+#' @keywords 
+#' @export
+#' @examples
+#' kmerMat = inputKMerFreqs(sprintf("kMerFiles/%s.freq.gz",sampleDesc$id), IDs = sampleDesc$id)
+#' myPCA = doKMerPCA(kmerMat, nPCs = "jackstraw")
+#` treatmentPCs = findDistinguishingPCs(myPCA$x[,1:myPCA$nPCs], sampleDesc[c("id","treated")])
 
 findDistinguishingPCs = function(rotatedData, classLabels){
   if (is.data.frame(classLabels)){
