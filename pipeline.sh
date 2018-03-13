@@ -27,7 +27,7 @@ bedtools bamtobed -i temp_files/aligned/$id.bam | gzip -c > temp_files/coords/$i
 
 echo removing mitochondrial reads, expand around cut sites
 # cut sites are start when +, end when -
-gzip -dc temp_files/coords/$id.bed.gz | grep -v -P '^chrM' | awk 'BEGIN{FS="\t";OFS="\t"};{if ($6=="+"){print $1, $2-50, $2+50, $4} else{print $1, $3-50, $3+50, $4}} > temp_files/coords/$id.regions.bed
+gzip -dc temp_files/coords/$id.bed.gz | grep -v -P '^chrM' | awk 'BEGIN{FS="\t";OFS="\t"};{if ($6=="+"){print $1, $2-50, $2+50, $4} else{print $1, $3-50, $3+50, $4}}' > temp_files/coords/$id.regions.bed
 
 echo sort bed file
 sort -k1,1 -k2,2n temp_files/coords/$id.regions.bed > temp_files/coords/$id.regions.sorted.bed
