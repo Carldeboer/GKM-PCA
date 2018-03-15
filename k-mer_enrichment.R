@@ -10,7 +10,7 @@
 #' @param rotated A numeric matrix containing the k-mer loadings for however many PCs you want analyzed (rows are k-mers, columns are PCs).
 #' @param binaryKMerMatchesToTFs A matrix of k-mers by TF motifs, where each row is a k-mer and each column is a TF motif. Each entry in the matrix is 1 if the k-mer matches the TF's motif, and 0 otherwise.
 #' @param n_max The maximum number of k-mers to consider for each minimum hypergeometric test. Defaults to 3000. Should be no more than about 10% of the number of k-mers. 
-#' @return a data.frame containing the following columns: TF (the TF motif), PC (the PC), pLow (minimum hyper geometric p-value for low-weighted k-mers), kLow (the number of top k-mers that yielded maximal enrichment, for low-weighted k-mers), logORLow (the log odds ratio (observed/expected) of k-mers for the point of maximal enrichment among kowly-weighted k-mers), pHigh (as before, for high-scoring k-mers), kHigh (ibid), logORHigh (ibid), i (a unique integer for each PC-motif combination).
+#' @return a data.frame containing the following columns: TF (the TF motif), PC (the PC), pLow (minimum hyper geometric log p-value for low-weighted k-mers), kLow (the number of top k-mers that yielded maximal enrichment, for low-weighted k-mers), logORLow (the log odds ratio (observed/expected) of k-mers for the point of maximal enrichment among kowly-weighted k-mers), pHigh (as before, for high-scoring k-mers), kHigh (ibid), logORHigh (ibid), i (a unique integer for each PC-motif combination).
 #' @keywords 
 #' @export
 #' @examples
@@ -22,7 +22,7 @@
 getKMerTFEnrichment = function(rotated, binaryKMerMatchesToTFs,n_max=3000, verbose=F){
   z=1;
   rotated = rotated[row.names(binaryKMerMatchesToTFs),]; #filter out and sort rows so that they're in the same order
-  tfKMerEnrichments = data.frame(TF = NA, PC=NA, pLow = NA, kLow = NA, logORLow = NA, pHigh = NA, kHigh = NA, logORHigh = NA, i = 1:(ncol(rotated)*ncol(binaryKMerMatchesToTFs)), stringsAsFactors = F );
+  tfKMerEnrichments = data.frame(Motif_ID = NA, PC=NA, p = NA, k = NA, logOR = NA, direction = NA, i = 1:(ncol(rotated)*ncol(binaryKMerMatchesToTFs)*2), stringsAsFactors = F );
   for(pci in 1:ncol(rotated)){
     curOrder = order(rotated[,pci]); #increasing order
     if (verbose){
@@ -32,20 +32,21 @@ getKMerTFEnrichment = function(rotated, binaryKMerMatchesToTFs,n_max=3000, verbo
       if (tfi %% 20==0 && verbose){
         message(sprintf("\tTF = %i",tfi));
       }
-      tfKMerEnrichments$TF[z] = colnames(binaryKMerMatchesToTFs)[tfi];
-      tfKMerEnrichments$PC[z] = colnames(rotated)[pci];
+      tfKMerEnrichments$Motif_ID[z:(z+1)] = colnames(binaryKMerMatchesToTFs)[tfi];
+      tfKMerEnrichments$PC[z:(z+1)] = colnames(rotated)[pci];
+      tfKMerEnrichments$direction[z:(z+1)] = c("low","high")
       curTest = minHG(binaryKMerMatchesToTFs[curOrder,tfi], n_max=n_max); #check for enrichment among low PC weights
       curTestRev = minHG(rev(binaryKMerMatchesToTFs[curOrder,tfi]), n_max=n_max); #check for enrichment among high PC weights
       
       #makeEnrichmentGraph(binaryKMerMatchesToTFs[curOrder,tfi], n_max=3000)
       #makeEnrichmentGraph(rev(binaryKMerMatchesToTFs[curOrder,tfi]), n_max=3000)
-      tfKMerEnrichments$pLow[z] = curTest$minP;
-      tfKMerEnrichments$pHigh[z] = curTestRev$minP;
-      tfKMerEnrichments$kLow[z] = curTest$k;
-      tfKMerEnrichments$kHigh[z] = curTestRev$k;
-      tfKMerEnrichments$logORLow[z] = curTest$logOR;
-      tfKMerEnrichments$logORHigh[z] = curTestRev$logOR;
-      z=z+1;
+      tfKMerEnrichments$p[z] = curTest$minP;
+      tfKMerEnrichments$p[z+1] = curTestRev$minP;
+      tfKMerEnrichments$k[z] = curTest$k;
+      tfKMerEnrichments$k[z+1] = curTestRev$k;
+      tfKMerEnrichments$logOR[z] = curTest$logOR;
+      tfKMerEnrichments$logOR[z+1] = curTestRev$logOR;
+      z=z+2;
     }
   }
   return(tfKMerEnrichments);
@@ -98,8 +99,7 @@ makeEnrichmentGraph = function(x, n_max = length(x)-1, sortedBy=NULL){
 
 
 makeEnrichmentGraphForPC = function(PC, binaryData, nmax=3000, decreasing=F){
-  data = merge(PC,binaryData, by=c("row.names"))
-  #str(data)
+  data = merge(as.data.frame(PC),as.data.frame(binaryData), by=c("row.names"))
   data = data[order(data[[2]],decreasing=decreasing),];
   p = makeEnrichmentGraph(data[[3]], n_max=nmax, sortedBy = data[[2]])
   return(p)
