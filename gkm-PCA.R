@@ -112,7 +112,7 @@ findDistinguishingPCs = function(rotatedData, classLabels){
   allResults = data.frame()
   for(c in classes){
     if (length(classes)>2 || classes[1]==c){
-      results = data.frame(PC = colnames(rotatedData), AUROC = NA, P=NA,class=c)
+      results = data.frame(PC = colnames(rotatedData), AUROC = NA, P=NA,class=c, stringsAsFactors=F)
       for (i in 1:ncol(rotatedData)){
         curTest = ranksumROC(rotatedData[names(classLabels)[classLabels==c],i],rotatedData[names(classLabels)[classLabels!=c],i])
         results$AUROC[i] = curTest$AUROC
