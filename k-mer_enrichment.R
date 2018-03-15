@@ -78,20 +78,17 @@ minHG = function(x, n_max = length(x)-1){
 
 makeEnrichmentGraph = function(x, n_max = length(x)-1, sortedBy=NULL){
   testData = data.frame(hits = x, rank =1:length(x), cumu=0, expected = (1:length(x)) * mean(x), OR=1);
-  testData$cumu[1] = testData$hits[1]+(testData$expected[1]/2); # add a pseudocount so that it doesn't start at -infinity
-  testData$OR[1] = testData$cumu[1]/testData$expected[1]
-  for(i in 2:nrow(testData)){
-    testData$cumu[i] = testData$cumu[i-1] + testData$hits[i];
-    testData$OR[i] = testData$cumu[i]/testData$expected[i];
-  }
+  testData$cumu = cumsum(testData$hits)
+  testData$cumu[1] = testData$cumu[1]+(testData$expected[1]/2); # add a pseudocount so that it doesn't start at -infinity
+  testData$OR= testData$cumu/testData$expected
   testData = rbind(data.frame(hits=0,rank=0,cumu=0,expected=0,OR=1), testData);
   testData$logOR =log2(testData$OR);
   test = minHG(x, n_max = n_max);
   if (!is.null(sortedBy)){
     testData$sortedBy = sortedBy[1:nrow(testData)];
-    p = ggplot(testData, aes(x=sortedBy, y=logOR)) + geom_line() + theme_bw() + geom_hline(yintercept=0,colour="red")+ggtitle(sprintf("log(p) = %g",test$minP))+geom_vline(xintercept=testData$sortedBy[testData$rank==test$k], colour="blue") + coord_cartesian(xlim=sort(c(testData$sortedBy[testData$rank==1],testData$sortedBy[testData$rank==n_max])))+ylab("log2(O/E)")+xlab("variable"); print(p);
+    p = ggplot(testData, aes(x=sortedBy, y=logOR)) + geom_line() + theme_bw() + geom_hline(yintercept=0,colour="red")+ggtitle(sprintf("log(p) = %g",test$minP))+geom_vline(xintercept=testData$sortedBy[testData$rank==test$k], colour="blue") +ylab("log2(O/E)")+xlab("variable"); print(p);
   }else{
-    p = ggplot(testData, aes(x=rank, y=logOR)) + geom_line() + theme_bw() + geom_hline(yintercept=0,colour="red")+ggtitle(sprintf("log(p) = %g",test$minP))+geom_vline(xintercept=test$k, colour="blue") + coord_cartesian(xlim=c(0,n_max))+ylab("log2(O/E)")+xlab("rank"); print(p);
+    p = ggplot(testData, aes(x=rank, y=logOR)) + geom_line() + theme_bw() + geom_hline(yintercept=0,colour="red")+ggtitle(sprintf("log(p) = %g",test$minP))+geom_vline(xintercept=test$k, colour="blue") +ylab("log2(O/E)")+xlab("rank"); print(p);
   }
   
   return (list(plot = p, rawData=testData));
