@@ -46,6 +46,9 @@ inputKMerFreqs = function(fileNames, IDs=fileNames){
 #' @examples
 #' kmerMat = inputKMerFreqs(sprintf("kMerFiles/%s.freq.gz",sampleDesc$id), IDs = sampleDesc$id)
 #' myPCA = doKMerPCA(kmerMat, nPCs = "jackstraw")
+#' p = ggplot(pcs$tSNEProj, aes(tSNE1, tSNE2)) + geom_point(); print(p) # plot tSNE projection
+#' pcs$tSNEProj = merge(pcs$tSNEProj,sampleDesc, by.x="ID",by.y="goodID") # add sample information to tSNE projection
+#' p = ggplot(pcs$tSNEProj, aes(tSNE1, tSNE2, colour=celltype)) + geom_point() + theme_classic(); print(p)
 
 doKMerPCA = function(x, nPCs="jackstraw", scale=T){
 	if(scale){
